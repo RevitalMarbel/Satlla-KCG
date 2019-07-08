@@ -2,6 +2,8 @@ import cv2
 import pytesseract
 from PIL import Image
 import time
+
+
 path="/Users/revital/PycharmProjects/earth_curve/image_orig/"
 #the name of the picture here
 name="iss-gallery-26.jpg"
