@@ -9,10 +9,9 @@ import cv2
 #args = vars(ap.parse_args())
 #image = cv2.imread('fullExStarS9.jpg')
 
-#file_name="fullExStarS9.jpg"
 
-#file_name='picForArticle.jpg'
-#file_name='DJI_0174.JPG'
+def takeRadius(elem):
+    return elem[2]
 
 file_name='/Users/revital/Pictures/earth/iss-gallery-26.jpg'
 
@@ -39,7 +38,7 @@ for contour in contours:
     area = cv2.contourArea(contour)
     #print(area)
     (x, y), radius = cv2.minEnclosingCircle(contour)
-    res.append([x,y,radius])
+
     center = (int(x), int(y))
     radius = int(radius)
     xint=center[0]
@@ -48,13 +47,11 @@ for contour in contours:
     y = str(y)
     r =str(radius)
 
-    file.write("%s ,%s ,%s" % (x ,y , r))
-    #file.write(t)
-    file.write('\n')
-    if (radius >1): #(and xint>300 and yint> 300):
+
+    if (radius >2): #(and xint>300 and yint> 300):
         cv2.circle(orig, center, radius, (0, 255, 255), 5)
-    #if ((len(approx) > 8) & (len(approx) < 23) & (area > 30) ):
-        contour_list.append(contour)
+        res.append([x, y, radius])
+#contour_list.append(contour)
 #ret, thresh = cv2.threshold(image,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 connectivity = 4
 #output = cv2.connectedComponentsWithStats(image, connectivity, cv2.CV_32S)
@@ -62,5 +59,11 @@ connectivity = 4
 # display the results of the naive attempt
 cv2.imshow("Naive", orig)
 cv2.imwrite("%s_processed.jpg" % file_name, orig)
+
+res.sort(key=takeRadius,reverse=True )
 #cv2.waitKey(0)
+for i in range(0,10):
+    file.write("%s ,%s ,%s" % (res[i][0] ,res[i][1] , res[i][2]))
+        #file.write(t)
+    file.write('\n')
 file.close()
