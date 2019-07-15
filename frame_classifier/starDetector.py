@@ -13,17 +13,23 @@ import cv2
 def takeRadius(elem):
     return elem[2]
 
-file_name='/Users/revital/Pictures/earth/iss-gallery-26.jpg'
+file_name='/Users/revital/Pictures/stars/20180401_225023.jpg'
 
 file = open("%s_res.txt" %file_name  ,"w")
 image = cv2.imread(file_name)
 orig = image.copy()
+imgheight, imgwidth = image.shape[:2]
 #image = image[0:2500,0:4000 ]
 #orig = image.copy()
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(gray)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(gray)
+#sobelx = cv2.Sobel(image,cv2.CV_64F,1,0,ksize=11)
+#sobelx=sobelx*255
+edges = cv2.Canny(image, 80, 250)
+print (np.max(edges))
+print ((edges.sum()/255)/(imgheight*imgwidth))
 
-edges = cv2.Canny(image, 80, 200)
+#print(edges)
 #print (edges)
 #cv2.circle(edges, maxLoc, 5, (255, 0, 0), 3)
 contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -48,8 +54,8 @@ for contour in contours:
     r =str(radius)
 
 
-    if (radius >2): #(and xint>300 and yint> 300):
-        cv2.circle(orig, center, radius, (0, 255, 255), 5)
+    if (radius >1 and radius <20): #(and xint>300 and yint> 300):
+        cv2.circle(orig, center, radius+4, (0, 255, 255), 5)
         res.append([x, y, radius])
 #contour_list.append(contour)
 #ret, thresh = cv2.threshold(image,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -62,8 +68,13 @@ cv2.imwrite("%s_processed.jpg" % file_name, orig)
 
 res.sort(key=takeRadius,reverse=True )
 #cv2.waitKey(0)
-for i in range(0,10):
-    file.write("%s ,%s ,%s" % (res[i][0] ,res[i][1] , res[i][2]))
+counter=0
+for i in res:
+    if(counter<10):
+        file.write("%s ,%s ,%s" % (i[0] ,i[1] , i[2]))
+    else:
+        break
+    counter=counter+1
         #file.write(t)
     file.write('\n')
 file.close()
