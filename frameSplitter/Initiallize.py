@@ -1,21 +1,23 @@
-import frame_classifier.up_or_down
-import frameSplitter
 import os
 import cv2
 import math
+
+import base64
+
+from pathlib import Path
 import numpy as np
 
 
-def main(name):
-    light_threshold=0.03
+def main(name, camera=0):
+    light_threshold=0.0001
     curve_dark_threshhold=0.5
     stars_dark_threshhold = 0.8
 
     #tate a picture
     #cahnge to: /pic/name
-    name_jpg='/Users/revital/PycharmProjects/Satlla-KCG/pic/'+name+'.jpg'
+    name_jpg='/pic/'+name+'.jpg'
 
-   # os.system('raspistill -o {}'.format(name_jpg))
+    os.system('raspistill -o -cs {} {}'.format(camera,name_jpg) )
     frame=cv2.imread(name_jpg)
     frame=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -29,8 +31,9 @@ def main(name):
 
     #compress to jpeg- get size:
     png_compression=50
+
     #change name- to /yadayada/name
-    cv2.imwrite(name_jpg, frame,[int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+    cv2.imwrite('/yada_yada/'+name_jpg, frame,[int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
     statinfo = os.stat(name_jpg)
     size=int(statinfo.st_size/1000)
     b_size=int_to_bytes(size)
@@ -40,7 +43,7 @@ def main(name):
     classify=0
     if(dark<curve_dark_threshhold):
         classify=1
-    if (dark > curve_dark_threshhold):
+    if (dark > stars_dark_threshhold):
         classify = 2
     if(light> light_threshold):
         classify=3
@@ -71,11 +74,11 @@ def main(name):
 
     file.write(b_classify)
     file.close()
+    os.system('cd temp &&  mkdir {}'.format(name))
+    crop(320, 180, name=name_jpg, frame=frame)
+    images_to_file(name=name, type=1)
 
-
-
-
-
+    #split frame
 
   #  if(dark<1):
   #    os.system('mkdir /temp/name')
@@ -90,7 +93,7 @@ def dark_light(frame):
     light = 0
     for i in range(0, imgheight):
         for j in range(0, imgwidth):
-            if (frame[i][j] < 10):
+            if (frame[i][j] < 5):
                 dark = dark + 1
             if (frame[i][j] > 250):
                 light = light + 1
@@ -122,6 +125,50 @@ def quality(image):
     return quality
 
 
+def crop( height, width,frame,name, k=0):
+    path = '/Users/revital/PycharmProjects/Satlla-KCG/temp/'+name
+    #frame = cv2.imread(name)
+    imgheight, imgwidth = frame.shape[:2]
+
+    k=1
+    for i in range(0,imgheight,height):
+        for j in range(0,imgwidth,width):
+            box = (j, i, j+width, i+height)
+            #a = frame[j:j+width,i: i+height]
+            a = frame[i: i + height,j:j + width]
+            #a.save("%s IMG-%s.png" % name %k)
+            l=str(k)
+            png_compression=50
+            #cv2.imwrite(path+'/%d.jpg' %k, a, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+            cv2.imwrite( '/temp/name/%d.jpg' % k, a, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+            #cv2.imwrite(path+"IMG_%d.png"  %k ,a)
+            #cv2.imwrite(path+'IMG_%d' %k,result)
+            #r = cv2.imread("IMG_%d.png" % k)
+            #r=Image.open("IMG_%d.png" % k, mode='r')
+            #print (r)
+            #result = pytesseract.image_to_string(r)
+            k +=1
+
+def images_to_file(name, type ):
+    path='/temp/'+name
+    entries = Path(path)
+    if(type):
+        counter=1
+        os.system('cd to_send &&  mkdir {}'.format(name))
+        for entry in entries.iterdir():
+            #if('IMG_' in entry.name):
+                #print(entry.name)
+                file = open( path+'/'+entry.name ,'rb')
+                #print(file.read())
+                result = base64.b64encode(file.read())
+                #print(result  )
+                file = open('/to_send/name/%s.txt' % counter, 'wb')
+                file.write(result)
+                file.close()
+                counter=counter+1
+        #file = open('/to_send/name/%s.txt' % str(0), 'wb')
+        #file.write(name, counter, type, time ,br )
+        #file.close()
 
 def pixel_normallize(pix, width,heigh):
     res_x=pix[0]/width
@@ -153,13 +200,13 @@ def int_to_pixel(i_x):
 def int_to_bytes_touple(x):
     return [int_to_bytes(x[0]),int_to_bytes(x[1])]
 
-def int_to_bytes(x: int) -> bytes:
+def int_to_bytes(x: int):
     return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
 def int_from_bytes_touple(x):
     return [int_from_bytes(x[0]),int_from_bytes(x[1])]
 
-def int_from_bytes(xbytes: bytes) -> int:
+def int_from_bytes(xbytes: bytes):
     return int.from_bytes(xbytes, 'big')
 
 main('CG5ZbDXVIAE1z3r')
