@@ -61,5 +61,5 @@ connectivity = 4
 
 #cv2.imshow("Naive", orig)
 cv2.imwrite("processed%s.jpg" % file_name, orig)
-cv2.waitKey(0)
+
 file.close()
