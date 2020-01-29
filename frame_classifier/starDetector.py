@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import cv2
+import math
 
 
 # if you want to read from CMD
@@ -11,9 +12,12 @@ import cv2
 
 
 def takeRadius(elem):
-    return elem[2]
+    return float(elem[2])
 
-file_name='/Users/revital/Pictures/stars/20180401_225023.jpg'
+def takeX(elem):
+    return float(elem[0])
+
+file_name='/Users/revital/Downloads/BigBear.jpg'
 
 file = open("%s_res.txt" %file_name  ,"w")
 image = cv2.imread(file_name)
@@ -25,7 +29,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 #(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(gray)
 #sobelx = cv2.Sobel(image,cv2.CV_64F,1,0,ksize=11)
 #sobelx=sobelx*255
-edges = cv2.Canny(image, 80, 250)
+edges = cv2.Canny(image, 120, 150)
 print (np.max(edges))
 print ((edges.sum()/255)/(imgheight*imgwidth))
 
@@ -66,15 +70,28 @@ connectivity = 4
 cv2.imshow("Naive", orig)
 cv2.imwrite("%s_processed.jpg" % file_name, orig)
 
-res.sort(key=takeRadius,reverse=True )
+#res.sort(key=takeRadius,reverse=True )
+res.sort(key=takeX,reverse=False )
 #cv2.waitKey(0)
 counter=0
-for i in res:
-    if(counter<10):
-        file.write("%s ,%s ,%s" % (i[0] ,i[1] , i[2]))
-    else:
-        break
-    counter=counter+1
+final_res=[]
+print(res)
+file.write("%s ,%s ,%s \n" % (res[0][0], res[0][1], res[0][2]))
+final_res.append([float(res[0][0]), float(res[0][1])])
+for i in range(1, len(res)):
+    if(counter<10  and math.fabs(float(res[i][0])-float(res[i-1][0])) >10 ):
+        file.write("%s ,%s ,%s \n" % (res[i][0] ,res[i][1] , res[i][2]))
+        final_res.append([float(res[i][0]) ,float(res[i][1])])
+        counter = counter + 1
+
+
         #file.write(t)
-    file.write('\n')
+    #file.write('\n')
 file.close()
+
+for i in range(len(final_res)):
+    for j in range(i+1, len (final_res)):
+        x=final_res[i][0]-final_res[j][0]
+        y=final_res[i][1]-final_res[j][1]
+        d= math.sqrt(x*x+y*y)
+        print(str(d))

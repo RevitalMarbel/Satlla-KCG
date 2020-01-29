@@ -25,6 +25,8 @@ def int_to_bytes_touple(x):
     return [int_to_bytes(x[0]),int_to_bytes(x[1])]
 
 def int_to_bytes(x: int) -> bytes:
+    #exif tool
+    # return bytearray(x)
     return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
 def int_from_bytes_touple(x):
@@ -33,6 +35,30 @@ def int_from_bytes_touple(x):
 def int_from_bytes(xbytes: bytes) -> int:
     return int.from_bytes(xbytes, 'big')
 
+def int_to_b_txt(name):
+    file = open(name, 'wb')
+    count = 0
+    while (count < 64*6):
+        r1 = int_to_bytes(count)
+        file.write(r1)
+        print(count, r1)
+        count = count + 64
+    file.close()
+
+def b_file_to_txt(name):
+    file = open(name, 'rb')
+    count =0
+    while(count<6):
+        r=file.read(1)
+        r1=int_from_bytes(r)
+        print(count ,r1)
+        print(count ,r)
+        count=count+1
+    file.close()
+
+int_to_b_txt('/Users/revital/PycharmProjects/Satlla-KCG/3.txt')
+
+b_file_to_txt('/Users/revital/PycharmProjects/Satlla-KCG/3.txt')
 
 test=pixel_normallize((200,300), 2000,1000)
 print(test)

@@ -8,22 +8,21 @@ from pathlib import Path
 import numpy as np
 
 
-def main(name, camera=0):
+def main(name,path='', camera=0):
     light_threshold=0.0001
     curve_dark_threshhold=0.5
     stars_dark_threshhold = 0.8
 
     #tate a picture
     #cahnge to: /pic/name
-    name_jpg='/pic/'+name+'.jpg'
+    #name_jpg='/pic/'+name+'.jpg'
 
-    os.system('raspistill -o -cs {} {}'.format(camera,name_jpg) )
-    frame=cv2.imread(name_jpg)
+    #os.system('raspistill -o -cs {} {}'.format(camera,name_jpg) )
+    frame=cv2.imread(path+'pic/'+name)
     frame=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     #get dark and light pixles:
     dark, light=dark_light(frame)
-
     qual= quality(frame)
     b_qual= int_to_bytes(qual)
     print('quality', qual)
@@ -33,8 +32,8 @@ def main(name, camera=0):
     png_compression=50
 
     #change name- to /yadayada/name
-    cv2.imwrite('/yada_yada/'+name_jpg, frame,[int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
-    statinfo = os.stat(name_jpg)
+    cv2.imwrite(path+'yada_yada/'+name, frame,[int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+    statinfo = os.stat(path+'yada_yada/'+name)
     size=int(statinfo.st_size/1000)
     b_size=int_to_bytes(size)
     print ('size', size)
@@ -75,8 +74,8 @@ def main(name, camera=0):
     file.write(b_classify)
     file.close()
     os.system('cd temp &&  mkdir {}'.format(name))
-    crop(320, 180, name=name_jpg, frame=frame)
-    images_to_file(name=name, type=1)
+    crop(320, 180, name=name,path=path, frame=frame)
+    images_to_file(name=name,path=path, type=1)
 
     #split frame
 
@@ -125,8 +124,8 @@ def quality(image):
     return quality
 
 
-def crop( height, width,frame,name, k=0):
-    path = '/Users/revital/PycharmProjects/Satlla-KCG/temp/'+name
+def crop( height, width,frame,name, path, k=0):
+    path = path+'temp/'+str(name)
     #frame = cv2.imread(name)
     imgheight, imgwidth = frame.shape[:2]
 
@@ -140,7 +139,7 @@ def crop( height, width,frame,name, k=0):
             l=str(k)
             png_compression=50
             #cv2.imwrite(path+'/%d.jpg' %k, a, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
-            cv2.imwrite( '/temp/name/%d.jpg' % k, a, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
+            cv2.imwrite( path+'temp/'+str(name)+'/%d.jpg'  %k, a, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
             #cv2.imwrite(path+"IMG_%d.png"  %k ,a)
             #cv2.imwrite(path+'IMG_%d' %k,result)
             #r = cv2.imread("IMG_%d.png" % k)
@@ -149,8 +148,8 @@ def crop( height, width,frame,name, k=0):
             #result = pytesseract.image_to_string(r)
             k +=1
 
-def images_to_file(name, type ):
-    path='/temp/'+name
+def images_to_file(name,path, type ):
+    path=path+'/temp/'+str(name)+'/'
     entries = Path(path)
     if(type):
         counter=1
@@ -162,7 +161,7 @@ def images_to_file(name, type ):
                 #print(file.read())
                 result = base64.b64encode(file.read())
                 #print(result  )
-                file = open('/to_send/name/%s.txt' % counter, 'wb')
+                file = open('/to_send/'+name+'/%s.txt' % counter, 'wb')
                 file.write(result)
                 file.close()
                 counter=counter+1
@@ -200,7 +199,7 @@ def int_to_pixel(i_x):
 def int_to_bytes_touple(x):
     return [int_to_bytes(x[0]),int_to_bytes(x[1])]
 
-def int_to_bytes(x: int):
+def int_to_bytes(x):
     return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
 def int_from_bytes_touple(x):
@@ -209,4 +208,4 @@ def int_from_bytes_touple(x):
 def int_from_bytes(xbytes: bytes):
     return int.from_bytes(xbytes, 'big')
 
-main('CG5ZbDXVIAE1z3r')
+main(path='/Users/revital/PycharmProjects/Satlla-KCG/',name='1.jpg')
