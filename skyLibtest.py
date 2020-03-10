@@ -75,7 +75,7 @@ ra, dec, distance = a1.radec()
 stars_ra.append(ra.hours*15)
 stars_dec.append(dec.degrees)
 
-#merek
+#Merek
 me_star = Star.from_dataframe(df.loc[53910])
 a2 = earth.at(t).observe(me_star)
 ra, dec, distance = a2.radec()
